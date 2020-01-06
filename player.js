@@ -85,37 +85,22 @@ class Player {
     }
 
     sensorIntersect(opponent){
-        this.sensors.forEach((sensor,key) => {
-            let isHit = false;
-            let d = 1;
-            let hit = collideLineRect(sensor.a.x + this.x, sensor.a.y + this.y, sensor.b.x + this.x,sensor.b.y + this.y,opponent.x,opponent.y,opponent.w,opponent.h,true);
-            
-            if(hit.top.x || hit.bottom.x || hit.left.x || hit.right.x){
-                isHit = true;
-                let closestHit = Infinity;
+        
+    }
 
-                for (const key in hit) {
-                    if (hit[key].x && hit[key].y) {
-                        let distance = dist(sensor.a.x + this.x, sensor.a.y + this.y, hit[key].x , hit[key].y);
-                        if (distance < closestHit) {
-                            closestHit = distance;
-                        }
-                    }
+    findClosest(opponents){
+        let closest = null;
+        let d = Infinity;
+        opponents.forEach(opponent => {
+            if (!(this.y < opponent.y)) {
+                let a = {
+                    x: this.x + (this.w / 2),
+                    y: this.y
                 }
 
-                let sensorLen = dist(sensor.a.x + this.x, sensor.a.y + this.y, sensor.b.x + this.x, sensor.b.y + this.y);
-
-                if (closestHit == Infinity) {
-                    d = 1;
-                }else{
-                    d = map(closestHit,0,sensorLen,0,1);
-                }
-
-
+                let b 
+                let distance = dist()
             }
-
-            this.sensors[key].isHit = isHit;
-            this.sensors[key].d = d;
         })
     }
 
