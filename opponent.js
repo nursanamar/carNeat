@@ -4,11 +4,12 @@ function Opponent() {
 
     this.x = floor(random(0, width-this.w));
     this.y = -this.h;
-    this.speed = playerSpeed-1;
+    this.speed = playerSpeed / 2;
 
     this.isOvertakenBy = false;
 
     this.show = function() {
+        point(this.x,this.y);
         image(im_car_green, this.x, this.y);
     }
 

@@ -3,11 +3,19 @@ var im_car_red;
 var im_boom;
 var im_heart;
 var font;
-var playerSpeed = 7;
+var playerSpeed = 10;
 var opponents = [];
 var roadMarkings = [];
 var score = 0;
 var lives = 5;
+
+
+let Ga = new GA(100,0.1,Brain);
+let players = [];
+let diedCount = 0;
+let scorePanel;
+let generationCount;
+let isLoop = false;
 
 function preload() {
     im_car_green = loadImage('assets/Car_Green.png');
@@ -20,10 +28,14 @@ function preload() {
 function setup() {
     createCanvas(400, 600);
     //frameRate(50);
-
+    scorePanel = createP('Hight score :' + Ga.highScore);
+    generationCount = createP('Generation :' + Ga.generation);
     roadMarkings.push(new roadMarking());
     opponents.push(new Opponent());
-    player = new Player();
+    
+    Ga.population.forEach(brain => {
+        players.push(new Player(brain));
+    })
 }
 
 function draw() {
@@ -55,57 +67,63 @@ function draw() {
         opponents[i].show();
         opponents[i].update();
 
-        if (opponents[i].overtakenBy(player) && opponents[i].isOvertakenBy === false) {
-            score += 5;
-            opponents[i].isOvertakenBy = true;
-        }
-
-        // If opponents collide with the player, they get destroyed
-        if (opponents[i].hits(player)) {
-            opponents[i].boom();
-            opponents.splice(i, 1);
-
-            // Penalty for collision is -10, and you loose one life
-            score = (score >= 10)?(score-10):0;
-            lives--;
-        }
         // Remove opponents once the are off the screen
-        else if (opponents[i].offscreen()) {
+        if (opponents[i].offscreen()) {
             opponents.splice(i, 1);
         }
     }
 
     // Show the player
-    player.show();
+    players.forEach(player => {
+        if (!player.died) {
+            player.show();
+            player.see(opponents);
+            player.think();
 
-    // Game controls
-    if (keyIsDown(LEFT_ARROW)) {
-        player.turnLeft();
-    }
-    if (keyIsDown(RIGHT_ARROW)) {
-        player.turnRight();
-    }
+            if (player.died) {
+                diedCount += 1;
+            }
+        }
+    })
 
-    // Show player stats
-    textSize(40);
-    textFont(font);
-    textAlign(LEFT);
-    fill(255);
-    text('Score: ' + score, 30, 60);
-
-    for (var i = 0 ; i < lives ; i++) {
-        image(im_heart, 30 + (i*70), height-60);
-    }
 
     // Check if game is over
-    if (lives === 0) {
+    if (players.length <= diedCount) {
         noLoop();
+        diedCount = 0;
+       newGame();
+    }
+}
 
-        textSize(60);
-        textFont(font);
-        textStyle(BOLD);
-        textAlign(CENTER);
-        fill(255);
-        text('GAME OVER', width/2, height/2);
+function newGame() {
+    opponents = [];
+    // roadMarkings = [];
+
+    // roadMarkings.push(new roadMarking());
+    opponents.push(new Opponent());
+
+    Ga.newGeneration();
+
+    players = [];
+
+    Ga.population.forEach(brain => {
+        players.push(new Player(brain));
+    })
+
+    scorePanel.html('Hight score :' + Ga.highScore);
+    generationCount.html('Generation  :' + Ga.generation);
+
+    loop();
+}
+
+function keyPressed() {
+    if (keyCode === ENTER) {
+        if (isLoop) {
+            noLoop();
+        }else{
+            loop();
+        }
+
+        isLoop = !isLoop;
     }
 }
