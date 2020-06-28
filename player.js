@@ -9,47 +9,7 @@ class Player {
         this.died = false;
 
         this.sensorLen = 200;
-        this.sensors = [
-            {
-                name: "A",
-                isHit: false,
-                a: {
-                    x: (this.w / 2),
-                    y: 0
-                },
-                b: {
-                    x: (this.w / 2),
-                    y: - this.sensorLen
-                },
-                d: 0
-            },
-            {
-                name: "b",
-                isHit: false,
-                a: {
-                    x: 0,
-                    y: 0
-                },
-                b: {
-                    x: - (this.w / 2),
-                    y: - this.sensorLen
-                },
-                d: 0
-            },
-            {
-                name: "b",
-                isHit: false,
-                a: {
-                    x: this.w,
-                    y: 0
-                },
-                b: {
-                    x: ((this.w / 2) * 3),
-                    y: - this.sensorLen
-                },
-                d: 0
-            },
-        ]
+        this.closest = null;
     }
 
     hits(opponent) {
@@ -80,70 +40,123 @@ class Player {
 
             this.ovartaken(opponent);
 
-            this.sensorIntersect(opponent);
         });
-    }
-
-    sensorIntersect(opponent){
-        
+        this.findClosest(opponents);
     }
 
     findClosest(opponents){
         let closest = null;
         let d = Infinity;
         opponents.forEach(opponent => {
-            if (!(this.y < opponent.y)) {
+            if (!(this.y < (opponent.y + opponent.h))) {
                 let a = {
                     x: this.x + (this.w / 2),
                     y: this.y
                 }
 
-                let b 
-                let distance = dist()
+                let b = {
+                    x: opponent.x + (opponent.w / 2),
+                    y: opponent.y + opponent.h
+                }
+                let distance = dist(a.x,a.y,b.x,b.y);
+
+                if (d > distance) {
+                    d = distance;
+                    closest = opponent;
+                }
             }
         })
+
+        if (closest != null) {
+            let a = {
+                x: this.x + (this.w / 2),
+                y: this.y
+            }
+
+            let b = {
+                x: closest.x + (closest.w / 2),
+                y: closest.y + closest.h
+            }
+
+            line(a.x,a.y,b.x,b.y);
+
+            this.closest = closest;
+        }
+
     }
 
     think(){
-        let inputs = [];
-        this.sensors.forEach(sensor => {
-            inputs.push(sensor.d);
-        })
 
-        let output = this.brain.think(inputs);
+        if (this.closest == null) {
+            return;
+        }
 
-        if (output[2] > 0.5) {
-            if (output[0] < output[1]) {
-                this.turnLeft();
-            } else {
-                this.turnRight();
+        
+        
+        let side = {
+            a: {
+                x: this.x + (this.w / 2),
+                y: this.y
+            },
+            b: {
+                x: this.closest.x + (this.closest.w / 2),
+                y: this.y
             }
         }
+
+        let up = {
+            a: {
+                x: this.x + (this.w / 2),
+                y: this.y
+            },
+            b: {
+                x: this.x + (this.w / 2),
+                y: this.closest.y + this.closest.h
+            }
+        }
+
+        let sideDistance = side.a.x - side.b.x;
+        let upDistance = up.a.y - up.b.y;
+
+
+        // line(side.a.x, side.a.y, side.b.x, side.b.y);
+        // line(up.a.x, up.a.y,up.b.x,up.b.y);
+        
+        let inputs = [sideDistance, upDistance, this.x + (this.w / 2)];
+        
+        let output = this.brain.think(inputs);
+
+           if (output[2] > 0.5) {
+               if (output[0] < output[1]) {
+                   this.turnLeft();
+               } else {
+                   this.turnRight();
+               }
+           }
     }
 
 
     show() {
-        push();
-        this.sensors.forEach(sensor => {
-            if (sensor.isHit) {
-                stroke('red'); 
-            }else{
-                stroke(255);
-            }
-            line(sensor.a.x + this.x,sensor.a.y + this.y,sensor.b.x + this.x,sensor.b.y + this.y);
-        })
-        pop();
         image(im_car_red, this.x, this.y);
     };
     turnLeft() {
-        this.x -= 10;
-        this.x = constrain(this.x, 0, width - this.w);
+        this.x -= 5;
+        this.x = constrain(this.x, 0, (width) - this.w);
+        this.x = constrain(this.x, 30, (width - 30) - this.w);
+
+        // if (this.x <= 0) {
+        //     this.died = true;
+        // }
         
     };
     turnRight() {
-        this.x += 10;
-        this.x = constrain(this.x, 0, width - this.w);  
+        this.x += 5;
+        this.x = constrain(this.x, 30, (width - 30) - this.w);
+        this.x = constrain(this.x, 0, (width) - this.w);  
 
+        // if ((this.x + this.w) >= width ) {
+        //     this.died = true;
+        // }
     };
 }
 

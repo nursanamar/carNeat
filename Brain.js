@@ -4,7 +4,7 @@ class Brain {
     score = 0;
 
     constructor(){
-        this.nn = new NeuralNetwork(3,3,1,4);
+        this.nn = new NeuralNetwork(3,3,0,0);
     }
 
     setDna(dna){

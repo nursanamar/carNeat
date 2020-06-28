@@ -14,6 +14,7 @@ let Ga = new GA(100,0.1,Brain);
 let players = [];
 let diedCount = 0;
 let scorePanel;
+let liveCount;
 let generationCount;
 let isLoop = false;
 
@@ -36,6 +37,8 @@ function setup() {
     Ga.population.forEach(brain => {
         players.push(new Player(brain));
     })
+
+    liveCount = createP('Number Of Players :' + (players.length - diedCount));
 }
 
 function draw() {
@@ -86,6 +89,7 @@ function draw() {
         }
     })
 
+    liveCount.html('Number Of Players :' + (players.length - diedCount))
 
     // Check if game is over
     if (players.length <= diedCount) {
@@ -100,7 +104,7 @@ function newGame() {
     // roadMarkings = [];
 
     // roadMarkings.push(new roadMarking());
-    opponents.push(new Opponent());
+    // opponents.push(new Opponent());
 
     Ga.newGeneration();
 
@@ -112,7 +116,7 @@ function newGame() {
 
     scorePanel.html('Hight score :' + Ga.highScore);
     generationCount.html('Generation  :' + Ga.generation);
-
+    
     loop();
 }
 
